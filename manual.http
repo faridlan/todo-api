@@ -1,9 +1,10 @@
-POST http://localhost:3000/api/todos
+POST http://localhost:4000/api/todos
 Content-Type: application/json
 Accept: application/json
 
 {
-  "title" : "Belanja Bulanan"
+  "title" : "Padel",
+  "description" : "Bermain Padel Hari Minggu"
 }
 
 ### Create
@@ -15,18 +16,19 @@ Accept: application/json
 ### Get List
 
 
-PATCH http://localhost:3000/api/todos/xxx
+PATCH http://localhost:4000/api/todos/3dd52c1a-eeed-4b70-b0b2-86a75d5461f1
 Content-Type: application/json
 Accept: application/json
 
 {
-  "title" : "Membaca Buku Pelajaran",
+  "title": "Belanja Bulanan",
+  "description" : "Belanja Bulan Februari 2026",
   "completed": true
 }
 
 ### Create
 
-DELETE http://localhost:3000/api/todos/xxx
+DELETE http://localhost:4000/api/todos/3dd52c1a-eeed-4b70-b0b2-86a75d5461f1
 Content-Type: application/json
 Accept: application/json
 

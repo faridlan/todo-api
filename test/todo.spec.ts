@@ -42,7 +42,7 @@ describe('AppController (e2e)', () => {
     it('should create a new todo', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/todos')
-        .send({ title: 'New Todo' });
+        .send({ title: 'New Todo', description: 'New Description' });
 
       logger.info(response.body);
 
@@ -88,6 +88,7 @@ describe('AppController (e2e)', () => {
         .patch(`/api/todos/${todo?.id}`)
         .send({
           title: '',
+          description: '',
           completed: '',
         });
 
@@ -113,6 +114,7 @@ describe('AppController (e2e)', () => {
         .patch(`/api/todos/${todo?.id}`)
         .send({
           title: 'New Todo',
+          description: 'New Description Update',
           completed: true,
         });
 

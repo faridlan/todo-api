@@ -18,6 +18,7 @@ export class TestService {
     await this.prismaService.todo.create({
       data: {
         title: 'New Todo',
+        description: 'New Description',
       },
     });
   }

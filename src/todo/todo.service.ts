@@ -24,6 +24,7 @@ export class TodoService {
     return {
       id: todo.id,
       title: todo.title,
+      description: todo.description ?? undefined,
       completed: todo.completed,
       createdAt: todo.createdAt,
       updatedAt: todo.updatedAt,
