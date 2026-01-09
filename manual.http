@@ -3,8 +3,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "title" : "Padel",
-  "description" : "Bermain Padel Hari Minggu"
+  "title" : "Belanja Vape",
+  "description" : "Beli Liquid, Ganti Kawat"
 }
 
 ### Create
