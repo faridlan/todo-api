@@ -1,0 +1,18 @@
+services:
+  api:
+    image: nulhakim/todo-api:1.0
+    build: .
+    container_name: todo-api
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    networks:
+      - psqldb_network
+    environment:
+      - PORT=4000
+    restart: unless-stopped
+
+networks:
+  psqldb_network:
+    external: true

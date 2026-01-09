@@ -3,19 +3,19 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "title" : "Membaca Buku"
+  "title" : "Belanja Bulanan"
 }
 
 ### Create
 
-GET http://localhost:3000/api/todos
+GET http://localhost:4000/api/todos
 Content-Type: application/json
 Accept: application/json
 
 ### Get List
 
 
-PATCH http://localhost:3000/api/todos/02596272-b408-42da-a861-8c96ecf65604
+PATCH http://localhost:3000/api/todos/xxx
 Content-Type: application/json
 Accept: application/json
 
