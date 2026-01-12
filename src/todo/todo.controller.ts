@@ -9,13 +9,18 @@ import {
   Post,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
-import { TodoResponse } from 'src/model/todo.model';
-import { WebResponse } from 'src/model/web.model';
+
 import { CreateTodoSwagger } from 'src/common/swagger/todo/create.swagger';
 import { ListTodoSwagger } from 'src/common/swagger/todo/list.swagger';
 import { UpdateTodoSwagger } from 'src/common/swagger/todo/update.swagger';
 import { DeleteTodoSwagger } from 'src/common/swagger/todo/delete.swagger';
-import { TodoCreateRequest, TodoUpdateRequest } from 'src/dto/todo.dto';
+import { TodoCreateDto } from './dto/todo-create.dto';
+import {
+  TodoWebResponseDto,
+  TodoWebResponsesDto,
+} from './dto/todo-web-response.dto';
+import { TodoUpdateDto } from './dto/todo-update.dto';
+import { WebResponse } from 'src/common/response/web-response.dto';
 
 @Controller('/api/todos')
 export class TodoController {
@@ -24,9 +29,7 @@ export class TodoController {
   @Post()
   @CreateTodoSwagger()
   @HttpCode(200)
-  async create(
-    @Body() request: TodoCreateRequest,
-  ): Promise<WebResponse<TodoResponse>> {
+  async create(@Body() request: TodoCreateDto): Promise<TodoWebResponseDto> {
     const result = await this.todoService.create(request);
 
     return {
@@ -37,7 +40,7 @@ export class TodoController {
   @Get()
   @ListTodoSwagger()
   @HttpCode(200)
-  async findAll(): Promise<WebResponse<TodoResponse[]>> {
+  async findAll(): Promise<TodoWebResponsesDto> {
     const result = await this.todoService.findAll();
     return {
       data: result,
@@ -48,9 +51,9 @@ export class TodoController {
   @UpdateTodoSwagger()
   @HttpCode(200)
   async update(
-    @Body() request: TodoUpdateRequest,
+    @Body() request: TodoUpdateDto,
     @Param('todoId') todoId: string,
-  ): Promise<WebResponse<TodoResponse>> {
+  ): Promise<TodoWebResponseDto> {
     request.id = todoId;
     const result = await this.todoService.update(request);
 

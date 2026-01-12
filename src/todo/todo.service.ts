@@ -1,16 +1,14 @@
-import { HttpException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/common/prisma.service';
 import { ValidationService } from 'src/common/validate.service';
-import {
-  CreateTodoRequest,
-  TodoResponse,
-  UpdateTodoRequest,
-} from 'src/model/todo.model';
 import { Logger } from 'winston';
 import { TodoValidation } from './todo.validation';
 import { Todo } from '@prisma/client';
 import { validate as isUuid } from 'uuid';
+import { CreateTodoCommand, UpdateTodoCommand } from './model/todo.command';
+import { TodoMapper } from './mapper/todo.mapper';
+import { TodoEntity } from './model/todo.entity';
 
 @Injectable()
 export class TodoService {
@@ -20,34 +18,23 @@ export class TodoService {
     private prismaService: PrismaService,
   ) {}
 
-  toTodoResponse(todo: Todo): TodoResponse {
-    return {
-      id: todo.id,
-      title: todo.title,
-      description: todo.description ?? undefined,
-      completed: todo.completed,
-      createdAt: todo.createdAt,
-      updatedAt: todo.updatedAt,
-    };
-  }
-
-  async create(request: CreateTodoRequest): Promise<TodoResponse> {
+  async create(request: CreateTodoCommand): Promise<TodoEntity> {
     this.logger.info('Creating a new todo', { request });
 
-    const createTodoRequest: CreateTodoRequest =
+    const createTodoRequest: CreateTodoCommand =
       this.validationService.validate(TodoValidation.CREATE, request);
 
     const todo = await this.prismaService.todo.create({
       data: createTodoRequest,
     });
 
-    return this.toTodoResponse(todo);
+    return TodoMapper.fromPrisma(todo);
   }
 
   async checkTodoMustExist(id: string): Promise<Todo> {
     if (!isUuid(id)) {
       this.logger.warn(`Invalid UUID format: ${id}`);
-      throw new HttpException('Todo not found', 404);
+      throw new NotFoundException('Todo not found');
     }
 
     const todo = await this.prismaService.todo.findUnique({
@@ -56,30 +43,30 @@ export class TodoService {
 
     if (!todo) {
       this.logger.warn(`Todo with id: ${id} not found`);
-      throw new HttpException('Todo not found', 404);
+      throw new NotFoundException('Todo not found');
     }
 
     return todo;
   }
 
-  async findAll(): Promise<TodoResponse[]> {
+  async findAll(): Promise<TodoEntity[]> {
     this.logger.info('Fetching all todos');
     const todos = await this.prismaService.todo.findMany();
 
-    return todos.map((todo) => this.toTodoResponse(todo));
+    return todos.map((todo) => TodoMapper.fromPrisma(todo));
   }
 
-  async update(request: UpdateTodoRequest): Promise<TodoResponse> {
+  async update(request: UpdateTodoCommand): Promise<TodoEntity> {
     this.logger.info(`Updating todo`, { request });
 
-    const updateTodoRequest: UpdateTodoRequest =
+    const updateTodoRequest: UpdateTodoCommand =
       this.validationService.validate(TodoValidation.UPDATE, request);
 
     let todo = await this.checkTodoMustExist(updateTodoRequest.id);
 
     const { id, ...updateData } = updateTodoRequest;
 
-    const cleanedData = Object.fromEntries(
+    const cleanedData: Partial<UpdateTodoCommand> = Object.fromEntries(
       Object.entries(updateData).filter(([value]) => value !== undefined),
     );
 
@@ -88,20 +75,20 @@ export class TodoService {
       data: cleanedData,
     });
 
-    return this.toTodoResponse(todo);
+    return TodoMapper.fromPrisma(todo);
   }
 
-  async remove(id: string): Promise<TodoResponse> {
+  async remove(id: string): Promise<boolean> {
     this.logger.info(`Deleting todo`, { id });
 
     await this.checkTodoMustExist(id);
 
-    const todo = await this.prismaService.todo.delete({
+    await this.prismaService.todo.delete({
       where: {
         id: id,
       },
     });
 
-    return this.toTodoResponse(todo);
+    return true;
   }
 }

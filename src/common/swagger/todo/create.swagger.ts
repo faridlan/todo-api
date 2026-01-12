@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ApiBadRequestResponseSwagger } from '../api-utils.swagger';
-import { TodoWebResponse } from 'src/dto/todo.dto';
+import { TodoResponseDto } from 'src/todo/dto/todo.response';
 
 export function CreateTodoSwagger() {
   return applyDecorators(
@@ -12,7 +12,7 @@ export function CreateTodoSwagger() {
     ApiResponse({
       status: 200,
       description: 'Todo created successfully',
-      type: TodoWebResponse,
+      type: TodoResponseDto,
     }),
     ApiBadRequestResponseSwagger(),
   );

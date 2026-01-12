@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { TodoWebResponses } from 'src/dto/todo.dto';
+import { TodoResponseDto } from 'src/todo/dto/todo.response';
 
 export function ListTodoSwagger() {
   return applyDecorators(
@@ -11,7 +11,7 @@ export function ListTodoSwagger() {
     ApiResponse({
       status: 200,
       description: 'Todo retrieved successfully',
-      type: TodoWebResponses,
+      type: TodoResponseDto,
     }),
   );
 }

@@ -4,7 +4,7 @@ import {
   ApiBadRequestResponseSwagger,
   ApiNotFoundResponseSwagger,
 } from '../api-utils.swagger';
-import { TodoWebResponse } from 'src/dto/todo.dto';
+import { TodoWebResponseDto } from 'src/todo/dto/todo-web-response.dto';
 
 export function UpdateTodoSwagger() {
   return applyDecorators(
@@ -15,7 +15,7 @@ export function UpdateTodoSwagger() {
     ApiResponse({
       status: 200,
       description: 'Todo updated successfully',
-      type: TodoWebResponse,
+      type: TodoWebResponseDto,
     }),
     ApiBadRequestResponseSwagger(),
     ApiNotFoundResponseSwagger(),
