@@ -16,18 +16,17 @@ Accept: application/json
 ### Get List
 
 
-PATCH http://localhost:4000/api/todos/240251b0-7663-4f20-ba47-2fd9a841e2c7
+PATCH http://localhost:4000/api/todos/5eaca8b0-edcc-4c0e-a1f4-a0c8f2122839
 Content-Type: application/json
 Accept: application/json
 
 {
-  "description" : "Belanja Bulan Februari 2026",
-  "completed": false
+  "completed": true
 }
 
 ### Create
 
-DELETE http://localhost:3000/api/todos/xxx
+DELETE http://localhost:4000/api/todos/dda41866-9ec7-437c-b327-ccbdb7fea19c
 Content-Type: application/json
 Accept: application/json
 
