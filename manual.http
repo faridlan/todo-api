@@ -3,8 +3,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "title" : "Belanja Vape",
-  "description" : "Beli Liquid, Ganti Kawat"
+  "title" : "",
+  "description" : ""
 }
 
 ### Create
@@ -16,7 +16,7 @@ Accept: application/json
 ### Get List
 
 
-PATCH http://localhost:4000/api/todos/5eaca8b0-edcc-4c0e-a1f4-a0c8f2122839
+PATCH http://localhost:4000/api/todos/60b9f90e-8f90-40b5-b40b-da15d1fad561
 Content-Type: application/json
 Accept: application/json
 
@@ -26,7 +26,7 @@ Accept: application/json
 
 ### Create
 
-DELETE http://localhost:4000/api/todos/dda41866-9ec7-437c-b327-ccbdb7fea19c
+DELETE http://localhost:4000/api/todos/salah
 Content-Type: application/json
 Accept: application/json
 

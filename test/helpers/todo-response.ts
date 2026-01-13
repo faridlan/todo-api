@@ -1,8 +1,8 @@
-export class TodoEntity {
+export interface TodoResponse {
   id: string;
   title: string;
   description?: string;
   completed: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }

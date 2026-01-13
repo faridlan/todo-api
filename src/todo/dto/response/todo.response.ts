@@ -29,3 +29,7 @@ export class TodoResponseDto {
   })
   updatedAt: Date;
 }
+
+export class TodoWebResponseDto<T> {
+  data: T;
+}

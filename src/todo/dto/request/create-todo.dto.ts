@@ -1,24 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsOptional, Length } from 'class-validator';
 
-export class TodoUpdateDto {
-  id: string;
+export class CreateTodoDto {
   @ApiProperty({
     example: 'Belanja Bulanan',
     minLength: 1,
     maxLength: 50,
-    required: false,
   })
+  @IsString()
+  @Length(1, 50)
   title: string;
+
   @ApiProperty({
     example: 'Belanja Bulanan Bulan Januari 2026',
+    required: false,
     minLength: 1,
     maxLength: 100,
-    required: false,
   })
+  @IsOptional()
+  @IsString()
+  @Length(1, 100)
   description?: string;
-  @ApiProperty({
-    example: true,
-    required: false,
-  })
-  completed: boolean;
 }

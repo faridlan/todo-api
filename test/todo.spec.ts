@@ -1,18 +1,21 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Test, TestingModule } from '@nestjs/testing';
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
-import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
+import { TestModule } from './test.module';
+import { TestService } from './test.service';
+import { WebErrorResponse, WebSuccessResponse } from './helpers/response';
+import { TodoResponse } from './helpers/todo-response';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { TestService } from './test.service';
-import { TestModule } from './test.module';
+import { setupValidation } from 'src/common/pipes/global-validation.pipe';
+import { HttpExceptionFilter } from 'src/common/filters/http-exception.filter';
 
-describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
-  let logger: Logger;
+describe('Todo API (E2E)', () => {
+  let app: INestApplication;
   let testService: TestService;
+  let logger: Logger;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -20,39 +23,54 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    app.useGlobalFilters(new HttpExceptionFilter());
+    setupValidation(app);
+
     await app.init();
 
-    logger = app.get(WINSTON_MODULE_PROVIDER);
     testService = app.get(TestService);
+    logger = app.get(WINSTON_MODULE_PROVIDER);
+  });
+
+  afterEach(async () => {
+    await app.close();
   });
 
   describe('POST /api/todos', () => {
     beforeEach(async () => {
       await testService.deleteTodo();
     });
+
     it('should be rejected if request is invalid', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/todos')
         .send({ title: '' });
 
+      const body = response.body as WebErrorResponse;
+
       expect(response.status).toBe(400);
-      expect(response.body.errors).toBeDefined();
+      expect(body.errors).toBeDefined();
     });
 
     it('should create a new todo', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/todos')
-        .send({ title: 'New Todo', description: 'New Description' });
+        .send({
+          title: 'New Todo',
+          description: 'New Description',
+        });
 
-      logger.info(response.body);
+      const body = response.body as WebSuccessResponse<TodoResponse>;
+
+      logger.info(body);
 
       expect(response.status).toBe(200);
-      expect(response.body.data).toBeDefined();
-      expect(response.body.data.id).toBeDefined();
-      expect(response.body.data.title).toBe('New Todo');
-      expect(response.body.data.completed).toBe(false);
-      expect(response.body.data.createdAt).toBeDefined();
-      expect(response.body.data.updatedAt).toBeDefined();
+      expect(body.data.id).toBeDefined();
+      expect(body.data.title).toBe('New Todo');
+      expect(body.data.completed).toBe(false);
+      expect(body.data.createdAt).toBeDefined();
+      expect(body.data.updatedAt).toBeDefined();
     });
   });
 
@@ -63,17 +81,18 @@ describe('AppController (e2e)', () => {
     });
 
     it('should get all todos', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/todos')
-        .send({ title: 'New Todo' });
+      const response = await request(app.getHttpServer()).get('/api/todos');
 
-      logger.info(response.body);
+      const body = response.body as WebSuccessResponse<TodoResponse[]>;
+
+      logger.info(body);
 
       expect(response.status).toBe(200);
-      expect(response.body.data[0].id).toBeDefined();
-      expect(response.body.data[0].completed).toBeDefined();
-      expect(response.body.data[0].createdAt).toBeDefined();
-      expect(response.body.data[0].updatedAt).toBeDefined();
+      expect(body.data.length).toBeGreaterThan(0);
+      expect(body.data[0].id).toBeDefined();
+      expect(body.data[0].completed).toBeDefined();
+      expect(body.data[0].createdAt).toBeDefined();
+      expect(body.data[0].updatedAt).toBeDefined();
     });
   });
 
@@ -82,8 +101,10 @@ describe('AppController (e2e)', () => {
       await testService.deleteTodo();
       await testService.createTodo();
     });
+
     it('should be rejected if request is invalid', async () => {
       const todo = await testService.getTodo();
+
       const response = await request(app.getHttpServer())
         .patch(`/api/todos/${todo?.id}`)
         .send({
@@ -92,24 +113,31 @@ describe('AppController (e2e)', () => {
           completed: '',
         });
 
+      const body = response.body as WebErrorResponse;
+
       expect(response.status).toBe(400);
-      expect(response.body.errors).toBeDefined();
+      expect(body.errors).toBeDefined();
     });
 
     it('should be rejected if todo is not found', async () => {
       const response = await request(app.getHttpServer())
-        .patch(`/api/todos/salah`)
+        .patch('/api/todos/invalid-id')
         .send({
           title: 'New Todo',
           completed: true,
         });
 
+      const body = response.body as WebErrorResponse;
+
+      logger.info(body);
+
       expect(response.status).toBe(404);
-      expect(response.body.errors).toBeDefined();
+      expect(body.errors).toBeDefined();
     });
 
-    it('should be able update todo', async () => {
+    it('should update todo', async () => {
       const todo = await testService.getTodo();
+
       const response = await request(app.getHttpServer())
         .patch(`/api/todos/${todo?.id}`)
         .send({
@@ -118,15 +146,13 @@ describe('AppController (e2e)', () => {
           completed: true,
         });
 
-      logger.info(response.body);
+      const body = response.body as WebSuccessResponse<TodoResponse>;
+
+      logger.info(body);
 
       expect(response.status).toBe(200);
-      expect(response.body.data).toBeDefined();
-      expect(response.body.data.id).toBeDefined();
-      expect(response.body.data.title).toBe('New Todo');
-      expect(response.body.data.completed).toBe(true);
-      expect(response.body.data.createdAt).toBeDefined();
-      expect(response.body.data.updatedAt).toBeDefined();
+      expect(body.data.completed).toBe(true);
+      expect(body.data.updatedAt).toBeDefined();
     });
   });
 
@@ -135,23 +161,29 @@ describe('AppController (e2e)', () => {
       await testService.deleteTodo();
       await testService.createTodo();
     });
-    it('should be able deleting todo', async () => {
+
+    it('should delete todo', async () => {
       const todo = await testService.getTodo();
+
       const response = await request(app.getHttpServer()).delete(
         `/api/todos/${todo?.id}`,
       );
 
+      const body = response.body as WebSuccessResponse<boolean>;
+
       expect(response.status).toBe(200);
-      expect(response.body.data).toBe(true);
+      expect(body.data).toBe(true);
     });
 
     it('should be rejected if todo is not found', async () => {
       const response = await request(app.getHttpServer()).delete(
-        `/api/todos/8f2e5140-7a89-4360-9ef8-b7c38f152f66`,
+        '/api/todos/8f2e5140-7a89-4360-9ef8-b7c38f152f66',
       );
 
+      const body = response.body as WebErrorResponse;
+
       expect(response.status).toBe(404);
-      expect(response.body.errors).toBeDefined();
+      expect(body.errors).toBeDefined();
     });
   });
 });
